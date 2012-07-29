@@ -19,8 +19,7 @@ login_manager = LoginManager()
 
 @login_manager.user_loader
 def load_user(id):
-    #return None
-    return User('a','b')
+    return User.query.filter_by(id=id).first()
 
 login_manager.setup_app(app)
 
@@ -69,23 +68,39 @@ class ImapAccount(db.Model):
 #def shutdown_session(exception=None):
 #    db_session.remove()
 
-@app.route("/")
+@app.route('/', methods=['GET', 'POST'])
 def loginpage():
-    if True:
-       login_user(User('a','b'))
-       return redirect(url_for("hello"))
-    else:
-        logout_user()
+    def check_credential(u):
+        return u and hashpw(password, u.salt) == u.passwd
 
-    return 'nope'
+    if request.method == 'POST':
+        username = request.form.get('username', '')
+        password = request.form.get('password', '')
 
+        u = User.query.filter_by(email=username).first()
+
+        if check_credential(u):
+            login_user(u)
+        else:
+            flash('bad command or file name')
+
+    if current_user.is_anonymous():
+        return render_template('login.html')
+
+    return redirect(url_for("hello"))
+
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for("loginpage"))
 
 @app.route("/mail")
 @login_required
 def hello():
     users = User.query.all()
-    return str(current_user.__dict__)
-    return '<pre>' + str([u.email for u in users]) + '</pre>'
+    return render_template('email.html')
+    #return str(current_user.__dict__)
 
 if __name__ == "__main__":
     # app.run()
