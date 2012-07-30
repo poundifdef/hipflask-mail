@@ -41,138 +41,63 @@
             <span class="icon-bar"></span>
           </a>
           <a class="brand" href="#">Hip Flask Mail</a>
-          <div class="nav-collapse">
-            <ul class="nav">
-              <li class="active"><a href="#">View Mail</a></li>
-
-   <li class="dropdown">
-    <a class="dropdown-toggle" data-toggle="dropdown" href="#menu1">
-      Admin
-      <b class="caret"></b>
-    </a>
-    <ul class="dropdown-menu">
-      <li><a href="/admin/mail">Edit Email Accounts</a></li>
-      <li><a href="#">Change Password</a></li>
-    </ul>
-  </li>
-</ul>
-
-<ul class="nav pull-right">
-              <li><a href="/logout">Logout</a></li>
-
-
-            </ul>
-          </div><!--/.nav-collapse -->
         </div>
       </div>
     </div>
 
 <div class="container-fluid">
   <div class="row-fluid">
-    <div class="span2">
-  
- <div class="accordion" id="accordion2" data-collapse-type="manual">
+    <div class="span12">
 
-{% if not mailboxes %}
-No mailboxes set up. Oh no!
-{% else %}
-
-{% for mailbox in mailboxes %}
-            <div class="accordion-group">
-              <div class="accordion-heading">
-                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#mailboxCollapse{{ mailbox.id  }}">
-                  {{ mailbox.email }}
-                </a>
-              </div>
-              <div id="mailboxCollapse{{ mailbox.id }}" class="accordion-body collapse">
-                <div class="accordion-inner">
-
-<ul class="nav nav-list">
-  <li class="active">
-    <a href="#">Inbox</a>
-  </li>
-  <li>
-    <a href="#">Sent</a>
-  </li>
-  <li>
-    <a href="#">Trash</a>
-  </li>
-</ul>
-
-
-                </div>
-              </div>
-            </div>
-
-{% endfor %}
-{% endif %}
-
-          </div>
-
-
-
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-error">
+      {{ message }}
     </div>
-    <div class="span10">
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 
-<ul class="breadcrumb">
-  <li>
-    dev@jaygoel.com <span class="divider">/</span>
-  </li>
-  <li class="active">Inbox</li>
-</ul>
+
+<h3>current.</h3>
 
 <table class="table">
 
 <tr>
-<td>gargoylemusic@gmail.com</td>
-<td>hi there!</td>
-<td>This is an email body la la la...</td>
-<td>7/18/12 9:35pm</td>
+<th>email</th>
+<th>password</th>
+<th>imap server</th>
+<th>delete</th>
 </tr>
 
-<tr>
-<td>gargoylemusic@gmail.com</td>
-<td>hi there!</td>
-<td>This is an email body la la la...</td>
-<td>7/18/12 9:35pm</td>
-</tr>
+{% for mailbox in mailboxes %}
 
 <tr>
-<td>gargoylemusic@gmail.com</td>
-<td>hi there!</td>
-<td>This is an email body la la la...</td>
-<td>7/18/12 9:35pm</td>
+<td>{{ mailbox.email  }}</td>
+<td>{{ mailbox.passwd  }}</td>
+<td>{{ mailbox.server }}</td>
+<td>
+
+<form method="post" action="/admin/mail/delete" class="form-inline">
+<button type="submit" class="btn btn-danger" name="delete_id" value="{{ mailbox.id }}"><i class="icon-remove icon-white"></i></button>
+</form>
+
+</td>
 </tr>
 
-<tr>
-<td>gargoylemusic@gmail.com</td>
-<td>hi there!</td>
-<td>This is an email body la la la...</td>
-<td>7/18/12 9:35pm</td>
-</tr>
 
-<tr>
-<td>gargoylemusic@gmail.com</td>
-<td>hi there!</td>
-<td>This is an email body la la la...</td>
-<td>7/18/12 9:35pm</td>
-</tr>
+{% endfor %}
 
 </table>
 
-<div class="pagination">
-  <ul>
-    <li><a href="#">Prev</a></li>
-    <li class="active">
-      <a href="#">1</a>
-    </li>
-    <li><a href="#">2</a></li>
-    <li><a href="#">3</a></li>
-    <li><a href="#">4</a></li>
-
-    <li><a href="#">Next</a></li>
-  </ul>
-</div>
+<h3>new.</h3>
+<form method="post" action="/admin/mail" class="well form-inline">
+<input type="text" name="email" placeholder="email address">
+<input type="text" name="passwd" placeholder="password">
+<input type="text" name="server" placeholder="imap server name">
+<button type="submit" class="btn btn-primary"><i class="icon-plus icon-white"></i></button>
+</form>
 
     </div>
   </div>
