@@ -106,6 +106,7 @@ def admin_delete():
 
         db.session.delete(a)
         db.session.commit()
+        flash('deleted that email box')
     except Exception as ex:
         flash('could not delete: ' + str(ex))
 
@@ -123,7 +124,6 @@ def admin_mail():
             return True
         except Exception as ex:
             flash("didn't work: " + str(ex))
-            pass
 
     if request.method == 'POST':
         server = request.form.get('server')
