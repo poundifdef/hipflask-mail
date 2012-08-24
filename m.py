@@ -4,9 +4,9 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import (LoginManager, current_user, login_required,
                             login_user, logout_user, UserMixin, AnonymousUser,
                             confirm_login, fresh_login_required)
-
-
 from bcrypt import gensalt, hashpw
+
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 db = SQLAlchemy(app)
@@ -48,10 +48,12 @@ class User(db.Model, UserMixin):
 
 class ImapAccount(db.Model):
     #__tablename__ = 'imap_accounts'
+
+
     id = db.Column(db.Integer, primary_key=True)
     # TODO: add name field
     server = db.Column(db.String(128), unique=False)
-    email = db.Column(db.String(128), unique=False, nullable=False)
+    email = db.Column(db.String(128), nullable=False)
     passwd = db.Column(db.String(128), unique=False, nullable=False)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -134,7 +136,13 @@ def admin_mail():
             i = ImapAccount(server, email, passwd, current_user)
             db.session.add(i)
             db.session.commit()
+
             flash('horray! it worked!')
+
+        all_mailboxes = ImapAccount.query.all()
+
+        print render_template('offlineimaprc.txt', mailboxes=all_mailboxes,
+                email_addresses=[box.email for box in all_mailboxes])
 
     page_info = {}
     page_info['mailboxes'] = ImapAccount.query.filter_by(user_id=current_user.id).all()

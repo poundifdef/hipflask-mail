@@ -1,0 +1,23 @@
+[general]
+accounts = {{ email_addresses|join(', ') }}
+
+{% for box in mailboxes %}
+
+[Account {{ box.email -}}]
+
+localrepository = {{ box.email }}Local
+remoterepository = {{ box.email }}Remote
+
+[Repository {{ box.email -}}Local]
+
+type = Maildir
+localfolders = ~/oi/{{ box.email }}
+
+[Repository {{ box.email -}}Remote]
+
+type = IMAP
+remotehost = {{ box.server }}
+remoteuser = {{ box.email }}
+remotepass = {{ box.passwd }}
+
+{% endfor %}
