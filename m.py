@@ -108,11 +108,28 @@ def admin_delete():
 
         db.session.delete(a)
         db.session.commit()
+
+        rewrite_offlineimaprc()
+
         flash('deleted that email box')
     except Exception as ex:
         flash('could not delete: ' + str(ex))
 
     return redirect(url_for("admin_mail"))
+
+
+def rewrite_offlineimaprc():
+    all_mailboxes = ImapAccount.query.all()
+    f = open('/home/jay/oi/offlineimaprc', 'w')
+
+    if all_mailboxes:
+        f.write(render_template('offlineimaprc.txt', mailboxes=all_mailboxes,
+                email_addresses=[box.email for box in all_mailboxes]))
+    else:
+        f.write('')
+
+    f.close()
+
 
 @app.route('/admin/mail', methods=['GET', 'POST'])
 @login_required
@@ -139,12 +156,7 @@ def admin_mail():
 
             flash('horray! it worked!')
 
-        all_mailboxes = ImapAccount.query.all()
-
-        f = open('/home/jay/oi/offlineimaprc', 'w')
-        f.write(render_template('offlineimaprc.txt', mailboxes=all_mailboxes,
-                email_addresses=[box.email for box in all_mailboxes]))
-        f.close()
+            rewrite_offlineimaprc()
 
     page_info = {}
     page_info['mailboxes'] = ImapAccount.query.filter_by(user_id=current_user.id).all()
