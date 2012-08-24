@@ -141,8 +141,10 @@ def admin_mail():
 
         all_mailboxes = ImapAccount.query.all()
 
-        print render_template('offlineimaprc.txt', mailboxes=all_mailboxes,
-                email_addresses=[box.email for box in all_mailboxes])
+        f = open('/home/jay/oi/offlineimaprc', 'w')
+        f.write(render_template('offlineimaprc.txt', mailboxes=all_mailboxes,
+                email_addresses=[box.email for box in all_mailboxes]))
+        f.close()
 
     page_info = {}
     page_info['mailboxes'] = ImapAccount.query.filter_by(user_id=current_user.id).all()
