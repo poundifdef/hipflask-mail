@@ -121,6 +121,23 @@ No mailboxes set up. Oh no!
   <li class="active">Inbox</li>
 </ul>
 
+
+
+<ul>
+{% for key, value in r.items() recursive %}
+
+  <li>
+  {{ key }}
+  {{ value }}
+  {% if value %}
+    <ul>{{ loop(value.items()) }}</ul>
+  {% endif %}
+  </li>
+
+{% endfor %}
+</ul>
+
+
 <table class="table">
 
 <tr>

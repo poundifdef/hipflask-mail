@@ -167,6 +167,9 @@ def admin_mail():
 def mail():
     page_info = {}
     page_info['mailboxes'] = ImapAccount.query.filter_by(user_id=current_user.id).all()
+
+    page_info['r'] = {'inbox': {'subfolder': {'s3':{}}, 's2': {}}, 'trash': {}}
+
     return render_template('email.html', **page_info)
 
 
