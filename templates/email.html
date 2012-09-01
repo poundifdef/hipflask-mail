@@ -124,13 +124,13 @@ No mailboxes set up. Oh no!
 
 
 <ul>
-{% for key, value in r.items() recursive %}
+{% for key, value in r recursive %}
 
   <li>
   {{ key }}
   {{ value }}
-  {% if value %}
-    <ul>{{ loop(value.items()) }}</ul>
+  {% if value.children %}
+    <ul>{{ loop(value) }} {{ value }} VV </ul>
   {% endif %}
   </li>
 

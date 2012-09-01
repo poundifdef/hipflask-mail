@@ -6,6 +6,8 @@ from flask.ext.login import (LoginManager, current_user, login_required,
                             confirm_login, fresh_login_required)
 from bcrypt import gensalt, hashpw
 
+import sys
+from collections import OrderedDict
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
@@ -14,9 +16,85 @@ db = SQLAlchemy(app)
 SECRET_KEY = "yeah, not actually a secret"
 DEBUG = True
 
+
 app.config.from_object(__name__)
 
 login_manager = LoginManager()
+
+
+class TreeNode(object):
+    def __init__(self, value=None):
+        self.value = value
+        self.parent = None
+        self.children = OrderedDict()
+        #self.children = defaultdict(lambda: None) 
+
+    def __iter__(self):
+        return self.children.iteritems()
+
+    def __getitem__(self, item):
+        return self.children[item]
+
+    def __getattr__(self, attr):
+        try:
+            return self.children[attr]
+        except KeyError:
+            raise AttributeError(attr)
+
+    def add_child(self, node, delimeter='.'):
+        #for item in node.value.split(delimeter):
+        items = node.split(delimeter)
+
+        if items:
+            item = items[0]
+            if item not in self.children:
+                self.children[item] = TreeNode(item)
+                self.children[item].parent = self
+
+            if len(items) > 1:
+                self.children[item].add_child(delimeter.join(items[1:]))
+
+    #def _add_child_to_self(self, node):
+    #    self.children[node.value] = node
+    #    #self.child.append(node)
+    #    node.parent = self
+
+    def get_lineage(self):
+        if self.parent is None:
+            return [self]
+
+        lineage = self.parent.get_lineage()
+        lineage.append(self)
+
+        return lineage
+
+    def __repr__(self):
+        return self.value
+
+a = TreeNode()
+#b = TreeNode('b')
+#c = TreeNode('c')
+#d = TreeNode('d')
+#e = TreeNode('e')
+#f = TreeNode('f')
+#g = TreeNode('g')
+
+a.add_child('b.c.d')
+a.add_child('b.c.e')
+a.add_child('b.c.f')
+
+#print a.children['b'].children['c'].parent
+#print a.children['b'].children['c'].get_lineage()
+
+#a.add_child(c)
+
+#c.add_child(d)
+#d.add_child(e)
+
+#print b.get_lineage()
+
+
+#sys.exit(0)
 
 
 @login_manager.user_loader
@@ -168,7 +246,8 @@ def mail():
     page_info = {}
     page_info['mailboxes'] = ImapAccount.query.filter_by(user_id=current_user.id).all()
 
-    page_info['r'] = {'inbox': {'subfolder': {'s3':{}}, 's2': {}}, 'trash': {}}
+    page_info['r'] = {'inbox': {'subfolder': {'s3':{ }}, 's2': {}}, 'trash': {}}
+    page_info['r'] = a
 
     return render_template('email.html', **page_info)
 
