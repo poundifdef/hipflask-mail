@@ -77,6 +77,8 @@
 No mailboxes set up. Oh no!
 {% else %}
 
+
+
 {% for mailbox in mailboxes %}
             <div class="accordion-group">
               <div class="accordion-heading">
@@ -88,17 +90,24 @@ No mailboxes set up. Oh no!
                 <div class="accordion-inner">
 
 <ul class="nav nav-list">
-  <li class="active">
-    <a href="#">Inbox</a>
-  </li>
-  <li>
-    <a href="#">Sent</a>
-  </li>
-  <li>
-    <a href="#">Trash</a>
-  </li>
-</ul>
 
+{% for key, value in r recursive %}
+
+
+  <li> <!-- class="#active" -->
+<a href="#">
+  {{ key }}
+  {{ value }}
+  {{ value.get_lineage() }}
+</a>
+  {% if value.children %}
+    <ul class="nav nav-list">{{ loop(value) }} </ul>
+  {% endif %}
+  </li>
+
+{% endfor %}
+
+</ul>
 
                 </div>
               </div>
@@ -119,22 +128,6 @@ No mailboxes set up. Oh no!
     dev@jaygoel.com <span class="divider">/</span>
   </li>
   <li class="active">Inbox</li>
-</ul>
-
-
-
-<ul>
-{% for key, value in r recursive %}
-
-  <li>
-  {{ key }}
-  {{ value }}
-  {% if value.children %}
-    <ul>{{ loop(value) }} {{ value }} VV </ul>
-  {% endif %}
-  </li>
-
-{% endfor %}
 </ul>
 
 

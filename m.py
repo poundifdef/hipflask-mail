@@ -60,10 +60,14 @@ class TreeNode(object):
     #    node.parent = self
 
     def get_lineage(self):
+        lineage = self._get_lineage()
+        return '.'.join([str(x.value) for x in lineage if x.value is not None])
+
+    def _get_lineage(self):
         if self.parent is None:
             return [self]
 
-        lineage = self.parent.get_lineage()
+        lineage = self.parent._get_lineage()
         lineage.append(self)
 
         return lineage
@@ -80,7 +84,7 @@ a = TreeNode()
 #g = TreeNode('g')
 
 a.add_child('b.c.d')
-a.add_child('b.c.e')
+a.add_child('a.b.c.e')
 a.add_child('b.c.f')
 
 #print a.children['b'].children['c'].parent
@@ -246,7 +250,7 @@ def mail():
     page_info = {}
     page_info['mailboxes'] = ImapAccount.query.filter_by(user_id=current_user.id).all()
 
-    page_info['r'] = {'inbox': {'subfolder': {'s3':{ }}, 's2': {}}, 'trash': {}}
+    #page_info['r'] = {'inbox': {'subfolder': {'s3':{ }}, 's2': {}}, 'trash': {}}
     page_info['r'] = a
 
     return render_template('email.html', **page_info)
