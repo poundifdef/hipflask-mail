@@ -247,11 +247,22 @@ def admin_mail():
 @app.route("/mail")
 @login_required
 def mail():
+    from os import listdir
+
     page_info = {}
     page_info['mailboxes'] = ImapAccount.query.filter_by(user_id=current_user.id).all()
 
-    #page_info['r'] = {'inbox': {'subfolder': {'s3':{ }}, 's2': {}}, 'trash': {}}
-    page_info['r'] = a
+    mail_directories = {}
+
+    for mailbox in page_info['mailboxes']:
+        t = TreeNode()
+        for d in listdir("/home/jay/oi/" + mailbox.email):
+            t.add_child(d)
+
+        mail_directories[mailbox.email] = t
+
+    # TODO: multiple accounts
+    page_info['r'] = mail_directories
 
     return render_template('email.html', **page_info)
 

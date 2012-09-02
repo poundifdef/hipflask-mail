@@ -91,14 +91,16 @@ No mailboxes set up. Oh no!
 
 <ul class="nav nav-list">
 
-{% for key, value in r recursive %}
+{% for key, value in r[mailbox.email] recursive %}
 
 
   <li> <!-- class="#active" -->
 <a href="#">
   {{ key }}
+<!--
   {{ value }}
   {{ value.get_lineage() }}
+-->
 </a>
   {% if value.children %}
     <ul class="nav nav-list">{{ loop(value) }} </ul>
