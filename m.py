@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, flash
+from flask import Flask, request, render_template, redirect, url_for, flash, Response
 
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import (LoginManager, current_user, login_required,
@@ -7,7 +7,10 @@ from flask.ext.login import (LoginManager, current_user, login_required,
 from bcrypt import gensalt, hashpw
 
 import sys
+import imaplib
 from collections import OrderedDict
+import os
+from os import listdir
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
@@ -54,11 +57,6 @@ class TreeNode(object):
             if len(items) > 1:
                 self.children[item].add_child(delimeter.join(items[1:]))
 
-    #def _add_child_to_self(self, node):
-    #    self.children[node.value] = node
-    #    #self.child.append(node)
-    #    node.parent = self
-
     def get_lineage(self):
         lineage = self._get_lineage()
         return '.'.join([str(x.value) for x in lineage if x.value is not None])
@@ -73,33 +71,7 @@ class TreeNode(object):
         return lineage
 
     def __repr__(self):
-        return self.value
-
-a = TreeNode()
-#b = TreeNode('b')
-#c = TreeNode('c')
-#d = TreeNode('d')
-#e = TreeNode('e')
-#f = TreeNode('f')
-#g = TreeNode('g')
-
-a.add_child('b.c.d')
-a.add_child('a.b.c.e')
-a.add_child('b.c.f')
-
-#print a.children['b'].children['c'].parent
-#print a.children['b'].children['c'].get_lineage()
-
-#a.add_child(c)
-
-#c.add_child(d)
-#d.add_child(e)
-
-#print b.get_lineage()
-
-
-#sys.exit(0)
-
+        return str(self.value)
 
 @login_manager.user_loader
 def load_user(id):
@@ -173,7 +145,6 @@ def loginpage():
 
     return redirect(url_for("mail"))
 
-
 @app.route("/logout")
 @login_required
 def logout():
@@ -217,7 +188,6 @@ def rewrite_offlineimaprc():
 @login_required
 def admin_mail():
     def verify_imap_credential(server, email, passwd):
-        import imaplib
         try:
             m = imaplib.IMAP4_SSL(request.form.get('server', ''))
             m.login(email, passwd)
@@ -244,10 +214,14 @@ def admin_mail():
     page_info['mailboxes'] = ImapAccount.query.filter_by(user_id=current_user.id).all()
     return render_template('admin_email.html', **page_info)
 
-@app.route("/mail")
+@app.route("/mail/", defaults={'email': None, 'folder': None})
+@app.route("/mail/<email>/<folder>/")
 @login_required
-def mail():
-    from os import listdir
+def mail(email, folder):
+    import urllib
+    if email and folder:
+        email = urllib.unquote(email)
+        folder = urllib.unquote(folder)
 
     page_info = {}
     page_info['mailboxes'] = ImapAccount.query.filter_by(user_id=current_user.id).all()
@@ -264,11 +238,23 @@ def mail():
     # TODO: multiple accounts
     page_info['r'] = mail_directories
 
-    return render_template('email.html', **page_info)
+    page_info['emails'] = None
+
+    if (email and folder) and (email in [x.email for x in page_info['mailboxes']]) and (os.path.isdir('/home/jay/oi/' + email + '/' + folder)):
+        page_info['emails'] = 'here you are!'
+
+    breadcrumbs = [email]
+    breadcrumbs.extend(folder.split('.'))
+    return render_template('email.html', breadcrumbs=breadcrumbs, **page_info)
 
 
 if __name__ == "__main__":
     db.create_all()
+    if not User.query.filter_by(email='a').first():
+        u = User('a', 'a')
+        db.session.add(u)
+        db.session.commit()
+
 
     # app.run()
     app.run(host='0.0.0.0', debug=True)

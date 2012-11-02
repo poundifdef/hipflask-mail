@@ -10,6 +10,15 @@
 
     <!-- Le styles -->
     <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet">
+
+    <link type="text/css" href="/static/jquery-ui-bootstrap/css/custom-theme/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+<link rel="stylesheet" type="text/css" media="screen" href="/static/jqGrid/css/ui.jqgrid.css" />
+
+    <script src="/static/bootstrap/js/jquery-1.7.2.js"></script>
+
+    <script src="/static/bootstrap/js/bootstrap.js"></script>
+
+
     <style>
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
@@ -95,7 +104,7 @@ No mailboxes set up. Oh no!
 
 
   <li> <!-- class="#active" -->
-<a href="#">
+<a href="/mail/{{ mailbox.email }}/{{ value.get_lineage() }}">
   {{ key }}
 <!--
   {{ value }}
@@ -126,12 +135,18 @@ No mailboxes set up. Oh no!
     <div class="span10">
 
 <ul class="breadcrumb">
-  <li>
-    dev@jaygoel.com <span class="divider">/</span>
-  </li>
-  <li class="active">Inbox</li>
+    {% for crumb in breadcrumbs %}
+      <li>
+       {{crumb}} <span class="divider">/</span>
+      </li>
+    {% endfor %}
 </ul>
 
+{% if emails %}
+hi
+{% else %}
+<p>Select an email folder on the left</p>
+{% endif %}
 
 <table class="table">
 
@@ -192,8 +207,6 @@ No mailboxes set up. Oh no!
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/static/bootstrap/js/jquery-1.7.2.js"></script>
-    <script src="/static/bootstrap/js/bootstrap.js"></script>
 <!--
     <script src="bootstrap/js/bootstrap-transition.js"></script>
     <script src="bootstrap/js/bootstrap-alert.js"></script>
