@@ -12,7 +12,14 @@
     <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet">
 
     <!--script src="/static/bootstrap/js/jquery-1.7.2.js"></script -->
+<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/css/jquery.dataTables.css">
+ 
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+
+<!-- DataTables -->
+<script type="text/javascript" charset="utf8" src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
 
     <script src="/static/bootstrap/js/bootstrap.js"></script>
 
@@ -37,6 +44,16 @@
   </head>
 
   <body>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    $('#myEmails').dataTable( {
+        "bProcessing": true,
+        "bServerSide": true,
+        "sAjaxSource": "{{request.path}}json"
+    } );
+} );
+</script>
 
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
@@ -144,15 +161,29 @@ No mailboxes set up. Oh no!
 </ul>
 
 {% if emails %}
-<table class="table">
-<tr>
-<td>gargoylemusic@gmail.com</td>
-<td>hi there!</td>
-<td>This is an email body la la la...</td>
-<td>7/18/12 9:35pm</td>
-</tr>
+
+<table class="table" id="myEmails">
+    <thead>
+        <tr>
+            <th>From</th> <!-- TODO: "To" -->
+            <th>Subject</th>
+            <th>Body</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+<!--
+        <tr>
+            <td>gargoylemusic@gmail.com</td>
+            <td>hi there!</td>
+            <td>This is an email body la la la...</td>
+            <td>7/18/12 9:35pm</td>
+        </tr>
+-->
+    </tbody>
 </table>
 
+<!--
 <div class="pagination">
   <ul>
     <li><a href="#">Prev</a></li>
@@ -166,6 +197,8 @@ No mailboxes set up. Oh no!
     <li><a href="#">Next</a></li>
   </ul>
 </div>
+-->
+
 {% endif %}
 
     </div>

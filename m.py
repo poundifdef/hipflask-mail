@@ -230,6 +230,12 @@ def mail_json(email, folder):
         'body': 'body preview...',
         'date': '11/7/2012',
     }
+    message = [
+        'foo@bar.com',
+        'my subject',
+        'body preview...',
+        '11/7/2012',
+   ] 
     messages = []
     messages.append(message)
     messages.append(message)
@@ -237,7 +243,11 @@ def mail_json(email, folder):
     messages.append(message)
     messages.append(message)
     messages.append(message)
-    return jsonify(dict(messages=messages))
+
+    for k, v in request.args.iteritems():
+        print "%s [%s]" % (k, v)
+
+    return jsonify(dict(aaData=messages))
     
 
 @app.route("/mail/", defaults={'email': None, 'folder': None})
