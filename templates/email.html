@@ -132,56 +132,25 @@ No mailboxes set up. Oh no!
     <div class="span10">
 
 <ul class="breadcrumb">
+    {% if breadcrumbs %}
     {% for crumb in breadcrumbs %}
       <li>
        {{crumb}} <span class="divider">/</span>
       </li>
     {% endfor %}
+    {% else %}
+    <li>Please select an email folder on the left</li>
+    {% endif %}
 </ul>
 
 {% if emails %}
-hi
-{% else %}
-<p>Select an email folder on the left</p>
-{% endif %}
-
 <table class="table">
-
 <tr>
 <td>gargoylemusic@gmail.com</td>
 <td>hi there!</td>
 <td>This is an email body la la la...</td>
 <td>7/18/12 9:35pm</td>
 </tr>
-
-<tr>
-<td>gargoylemusic@gmail.com</td>
-<td>hi there!</td>
-<td>This is an email body la la la...</td>
-<td>7/18/12 9:35pm</td>
-</tr>
-
-<tr>
-<td>gargoylemusic@gmail.com</td>
-<td>hi there!</td>
-<td>This is an email body la la la...</td>
-<td>7/18/12 9:35pm</td>
-</tr>
-
-<tr>
-<td>gargoylemusic@gmail.com</td>
-<td>hi there!</td>
-<td>This is an email body la la la...</td>
-<td>7/18/12 9:35pm</td>
-</tr>
-
-<tr>
-<td>gargoylemusic@gmail.com</td>
-<td>hi there!</td>
-<td>This is an email body la la la...</td>
-<td>7/18/12 9:35pm</td>
-</tr>
-
 </table>
 
 <div class="pagination">
@@ -197,6 +166,7 @@ hi
     <li><a href="#">Next</a></li>
   </ul>
 </div>
+{% endif %}
 
     </div>
   </div>
