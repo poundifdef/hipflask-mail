@@ -230,24 +230,35 @@ def mail_json(email, folder):
         'body': 'body preview...',
         'date': '11/7/2012',
     }
+
+    total_records = 67 
+    filtered_records = total_records # 30 
+    num_requested = int(request.args['iDisplayLength'])
+
+    # TODO: sanity check on this value! what if it is greater than total?
+    starting_record = int(request.args['iDisplayStart'])
+
+    num_to_return = num_requested
+    if filtered_records - starting_record < num_requested:
+        num_to_return = filtered_records - starting_record
+
     message = [
         'foo@bar.com',
         'my subject',
         'body preview...',
         '11/7/2012',
    ] 
-    messages = []
-    messages.append(message)
-    messages.append(message)
-    messages.append(message)
-    messages.append(message)
-    messages.append(message)
-    messages.append(message)
+    messages = [message] * num_to_return
 
-    for k, v in request.args.iteritems():
-        print "%s [%s]" % (k, v)
+    #for k, v in request.args.iteritems():
+    #    print "%s [%s]" % (k, v)
 
-    return jsonify(dict(aaData=messages))
+    return jsonify(dict(
+        aaData=messages,
+        iTotalRecords=total_records,
+        iTotalDisplayRecords=filtered_records,
+        sEcho=int(request.args['sEcho']),
+    ))
     
 
 @app.route("/mail/", defaults={'email': None, 'folder': None})

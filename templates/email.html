@@ -50,7 +50,12 @@ $(document).ready(function() {
     $('#myEmails').dataTable( {
         "bProcessing": true,
         "bServerSide": true,
-        "sAjaxSource": "{{request.path}}json"
+        "sAjaxSource": "{{request.path}}json",
+        "bPaginate": true,
+        "bFilter": false,
+        "sPaginationType": "full_numbers",
+        "bLengthChange": false,
+        "iDisplayLength": 30
     } );
 } );
 </script>
