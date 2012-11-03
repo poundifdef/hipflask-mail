@@ -11,12 +11,21 @@
     <!-- Le styles -->
     <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet">
 
-    <link type="text/css" href="/static/jquery-ui-bootstrap/css/custom-theme/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
-<link rel="stylesheet" type="text/css" media="screen" href="/static/jqGrid/css/ui.jqgrid.css" />
+    <!--script src="/static/bootstrap/js/jquery-1.7.2.js"></script -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 
-    <script src="/static/bootstrap/js/jquery-1.7.2.js"></script>
 
     <script src="/static/bootstrap/js/bootstrap.js"></script>
+
+
+<script id="messageTemplate" type="text/x-jquery-tmpl">
+<tr>
+<td>${from}</td>
+<td>${subject}</td>
+<td>{$body}</td>
+<td>{$date}</td>
+</tr>
+</script>
 
 
     <style>
@@ -24,7 +33,7 @@
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
       }
     </style>
-    <link href="/static/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+    <!-- link href="/static/bootstrap/css/bootstrap-responsive.css" rel="stylesheet" -->
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -204,6 +213,40 @@ hi
     </div>
   </div>
 </div>
+
+<ul id="movieList"></ul>
+
+<script id="movieTemplate" type="text/x-jquery-tmpl">
+    <li><b>${Name}</b> (${ReleaseYear})</li>
+</script>
+
+<script type="text/javascript">
+    var movies = [
+        { Name: "The Red Violin", ReleaseYear: "1998" },
+        { Name: "Eyes Wide Shut", ReleaseYear: "1999" },
+        { Name: "The Inheritance", ReleaseYear: "1976" }
+    ];
+
+    // Render the template with the movies data and insert
+    // the rendered HTML under the "movieList" element
+    $( "#movieTemplate" ).tmpl( movies )
+        .appendTo( "#movieList" );
+</script>
+
+<script type="text/javascript">
+
+    var messages = [
+        { from: "The Red Violin", subject: "1998", body: "mail body", date: "this is a date" },
+        { from: "The Red Violin", subject: "1998", body: "mail body", date: "this is a date" }
+    ];
+
+    // Render the template with the movies data and insert
+    // the rendered HTML under the "movieList" element
+    $( "#messageTemplate" ).tmpl( messages )
+        .appendTo( "#table" );
+
+</script>
+
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->

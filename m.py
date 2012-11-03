@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, flash, Response
+from flask import Flask, request, render_template, redirect, url_for, flash, Response, jsonify
 
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import (LoginManager, current_user, login_required,
@@ -10,6 +10,7 @@ import sys
 import imaplib
 from collections import OrderedDict
 import os
+import urllib
 from os import listdir
 
 app = Flask(__name__)
@@ -214,11 +215,35 @@ def admin_mail():
     page_info['mailboxes'] = ImapAccount.query.filter_by(user_id=current_user.id).all()
     return render_template('admin_email.html', **page_info)
 
+@app.route("/mail/<email>/<folder>/json")
+@login_required
+def mail_json(email, folder):
+    email = urllib.unquote(email)
+    folder = urllib.unquote(folder)
+    mailboxes = ImapAccount.query.filter_by(user_id=current_user.id, email=email).first()
+    if not mailboxes:
+        return '{}'  # actually return 404
+
+    message = {
+        'from': 'foo@bar.com',
+        'subject': 'my subject',
+        'body': 'body preview...',
+        'date': '11/7/2012',
+    }
+    messages = []
+    messages.append(message)
+    messages.append(message)
+    messages.append(message)
+    messages.append(message)
+    messages.append(message)
+    messages.append(message)
+    return jsonify(dict(messages=messages))
+    
+
 @app.route("/mail/", defaults={'email': None, 'folder': None})
 @app.route("/mail/<email>/<folder>/")
 @login_required
 def mail(email, folder):
-    import urllib
     if email and folder:
         email = urllib.unquote(email)
         folder = urllib.unquote(folder)
@@ -235,16 +260,16 @@ def mail(email, folder):
 
         mail_directories[mailbox.email] = t
 
-    # TODO: multiple accounts
     page_info['r'] = mail_directories
 
     page_info['emails'] = None
 
+    breadcrumbs = []
     if (email and folder) and (email in [x.email for x in page_info['mailboxes']]) and (os.path.isdir('/home/jay/oi/' + email + '/' + folder)):
         page_info['emails'] = 'here you are!'
+        breadcrumbs.append(email)
+        breadcrumbs.extend(folder.split('.'))
 
-    breadcrumbs = [email]
-    breadcrumbs.extend(folder.split('.'))
     return render_template('email.html', breadcrumbs=breadcrumbs, **page_info)
 
 
