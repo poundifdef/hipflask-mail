@@ -5,7 +5,7 @@ class MaildirUtils:
     def __init__(self, account):
         self.account = account
 
-    def _get_fields(self, msg_path, length=30):
+    def _get_fields(self, msg_path, length=50):
         cmd = [
             'mu',
             'view',

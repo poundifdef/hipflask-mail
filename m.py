@@ -238,14 +238,6 @@ def mail_json(email, folder):
     if not os.path.isdir(messagepath):
         return '{}'  # actually return 404
 
-    message = {
-        'from': 'foo@bar.com',
-        'subject': 'my subject',
-        'body': 'body preview...',
-        'date': '11/7/2012',
-    }
-
-
     num_requested = int(request.args['iDisplayLength'])
 
     # TODO: sanity check on this value! what if it is greater than total?
@@ -262,7 +254,7 @@ def mail_json(email, folder):
         msg = [
             m.get('from', ''),
             m.get('subject', ''),
-            m.get('summary', ''),
+            # m.get('summary', ''),
             m.get('date', ''),
             'read_unread_flag'
         ]
@@ -298,15 +290,15 @@ def mail(email, folder):
 
     page_info['r'] = mail_directories
 
-    page_info['emails'] = None
+    page_info['emails'] = False
 
     breadcrumbs = []
     if (email and folder) and (email in [x.email for x in page_info['mailboxes']]) and (os.path.isdir('/home/jay/oi/' + email + '/' + folder)):
-        page_info['emails'] = 'here you are!'
+        page_info['emails'] = True
         breadcrumbs.append(email)
         breadcrumbs.extend(folder.split('.'))
 
-    return render_template('email.html', breadcrumbs=breadcrumbs, **page_info)
+    return render_template('email.html', breadcrumbs=breadcrumbs, current_email=email, current_folder=folder, **page_info)
 
 
 if __name__ == "__main__":

@@ -85,6 +85,9 @@ $(document).ready(function() {
   </li>
 </ul>
 
+
+
+
 <ul class="nav pull-right">
               <li><a href="/logout">Logout</a></li>
 
@@ -95,40 +98,30 @@ $(document).ready(function() {
       </div>
     </div>
 
+
 <div class="container-fluid">
+
   <div class="row-fluid">
     <div class="span2">
   
- <div class="accordion" id="accordion2" data-collapse-type="manual">
-
 {% if not mailboxes %}
-No mailboxes set up. Oh no!
-{% else %}
-
-
-
-{% for mailbox in mailboxes %}
-            <div class="accordion-group">
-              <div class="accordion-heading">
-                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#mailboxCollapse{{ mailbox.id  }}">
-                  {{ mailbox.email }}
-                </a>
-              </div>
-              <div id="mailboxCollapse{{ mailbox.id }}" class="accordion-body collapse">
-                <div class="accordion-inner">
+<p>No mailboxes set up. Oh no!</p>
+{% endif %}
 
 <ul class="nav nav-list">
+{% for mailbox in mailboxes %}
+  <li class="nav-header">{{mailbox.email}}</li>
 
 {% for key, value in r[mailbox.email] recursive %}
 
-
+{% if current_email == mailbox.email and current_folder == value.get_lineage() %}
+  <li class="active">
+{% else %}
   <li> <!-- class="#active" -->
+{% endif %}
+
 <a href="/mail/{{ mailbox.email }}/{{ value.get_lineage() }}">
   {{ key }}
-<!--
-  {{ value }}
-  {{ value.get_lineage() }}
--->
 </a>
   {% if value.children %}
     <ul class="nav nav-list">{{ loop(value) }} </ul>
@@ -137,18 +130,9 @@ No mailboxes set up. Oh no!
 
 {% endfor %}
 
-</ul>
-
-                </div>
-              </div>
-            </div>
-
 {% endfor %}
-{% endif %}
 
-          </div>
-
-
+</ul>
 
     </div>
     <div class="span10">
@@ -172,19 +156,13 @@ No mailboxes set up. Oh no!
         <tr>
             <th>From</th> <!-- TODO: "To" -->
             <th>Subject</th>
+<!--
             <th>Body</th>
+-->
             <th>Date</th>
         </tr>
     </thead>
     <tbody>
-<!--
-        <tr>
-            <td>gargoylemusic@gmail.com</td>
-            <td>hi there!</td>
-            <td>This is an email body la la la...</td>
-            <td>7/18/12 9:35pm</td>
-        </tr>
--->
     </tbody>
 </table>
 
