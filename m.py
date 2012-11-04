@@ -12,6 +12,7 @@ from collections import OrderedDict
 import os
 import urllib
 from os import listdir
+from read_maildir import MaildirUtils
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
@@ -221,7 +222,14 @@ def mail_json(email, folder):
     email = urllib.unquote(email)
     folder = urllib.unquote(folder)
     mailboxes = ImapAccount.query.filter_by(user_id=current_user.id, email=email).first()
+
+    # TODO: return 'empty' messages rather than {}
+
     if not mailboxes:
+        return '{}'  # actually return 404
+
+    messagepath = '/home/jay/oi/' + email + '/' + folder
+    if not os.path.isdir(messagepath):
         return '{}'  # actually return 404
 
     message = {
@@ -231,27 +239,22 @@ def mail_json(email, folder):
         'date': '11/7/2012',
     }
 
-    total_records = 67 
-    filtered_records = total_records # 30 
+
+    #total_records = 67 
     num_requested = int(request.args['iDisplayLength'])
 
     # TODO: sanity check on this value! what if it is greater than total?
     starting_record = int(request.args['iDisplayStart'])
 
-    num_to_return = num_requested
-    if filtered_records - starting_record < num_requested:
-        num_to_return = filtered_records - starting_record
+    md = MaildirUtils(email)
+    total_records, msgs = md.get_messages(folder, starting_record, num_requested)
 
-    message = [
-        'foo@bar.com',
-        'my subject',
-        'body preview...',
-        '11/7/2012',
-   ] 
-    messages = [message] * num_to_return
+    filtered_records = total_records # 30 
 
-    #for k, v in request.args.iteritems():
-    #    print "%s [%s]" % (k, v)
+    messages = []
+    for m in msgs:
+        msg = [m.get('from'), m.get('subject'), m.get('summary'), m.get('date'), 'read_unread_flag']
+        messages.append(msg)
 
     return jsonify(dict(
         aaData=messages,
