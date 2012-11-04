@@ -253,7 +253,13 @@ def mail_json(email, folder):
     import cgi
     messages = []
     for m in msgs:
-        msg = [m.get('from'), m.get('subject'), m.get('summary'), m.get('date'), 'read_unread_flag']
+        msg = [
+            m.get('from', ''),
+            m.get('subject', ''),
+            m.get('summary', ''),
+            m.get('date', ''),
+            'read_unread_flag'
+        ]
         messages.append([cgi.escape(m) for m in msg])
 
     return jsonify(dict(
