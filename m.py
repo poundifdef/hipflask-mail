@@ -240,21 +240,21 @@ def mail_json(email, folder):
     }
 
 
-    #total_records = 67 
     num_requested = int(request.args['iDisplayLength'])
 
     # TODO: sanity check on this value! what if it is greater than total?
     starting_record = int(request.args['iDisplayStart'])
 
     md = MaildirUtils(email)
-    total_records, msgs = md.get_messages(folder, starting_record, num_requested)
+    total_records, msgs = md.get_messages(email, folder, starting_record, num_requested)
 
     filtered_records = total_records # 30 
 
+    import cgi
     messages = []
     for m in msgs:
         msg = [m.get('from'), m.get('subject'), m.get('summary'), m.get('date'), 'read_unread_flag']
-        messages.append(msg)
+        messages.append([cgi.escape(m) for m in msg])
 
     return jsonify(dict(
         aaData=messages,

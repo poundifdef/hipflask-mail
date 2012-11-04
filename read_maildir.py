@@ -5,21 +5,6 @@ class MaildirUtils:
     def __init__(self, account):
         self.account = account
 
-    def _get_field(self, msg_path, field):
-        cmd = [
-            'mu',
-            'find',
-            'i:' + msg_id,
-            '--format=plain',
-            '--fields',
-            field,
-        ]
-
-        p = Popen(cmd, stdout=PIPE).stdout
-        r = p.read().strip()
-        p.close()
-        return r
-
     def _get_fields(self, msg_path, length=30):
         cmd = [
             'mu',
@@ -48,11 +33,11 @@ class MaildirUtils:
         return message
 
 
-    def get_messages(self, folder, start, length):
+    def get_messages(self, email, folder, start, length):
         p = Popen([
             'mu',
             'find',
-            'maildir:/dev@jaygoel.com/INBOX',
+            'maildir:/%s/%s' % (email, folder),
             '--sortfield=date',
             '--reverse',
             '--format=plain',
