@@ -173,6 +173,12 @@ def admin_delete():
     return redirect(url_for("admin_mail"))
 
 
+def sync_mail():
+    pass
+    # offlineimap -c /home/jay/oi/offlineimaprc
+    # mu index --maildir=/home/jay/oi
+
+
 def rewrite_offlineimaprc():
     all_mailboxes = ImapAccount.query.all()
     f = open('/home/jay/oi/offlineimaprc', 'w')
