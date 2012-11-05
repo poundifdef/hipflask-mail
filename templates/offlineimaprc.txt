@@ -15,7 +15,12 @@ localfolders = ~/oi/{{ box.email }}
 
 [Repository {{ box.email -}}Remote]
 
+{% if box.email.endswith('@gmail.com') %}
+type = Gmail
+{% else %}
 type = IMAP
+{% endif %}
+ssl = yes
 remotehost = {{ box.server }}
 remoteuser = {{ box.email }}
 remotepass = {{ box.passwd }}

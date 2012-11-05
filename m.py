@@ -156,6 +156,8 @@ def logout():
 @app.route('/admin/mail/delete', methods=['POST'])
 @login_required
 def admin_delete():
+    # TODO: instead, mark as deleted so that we preserve data and can
+    #       retrieve maildir in future
     try:
         a = ImapAccount.query.filter_by(
             id=request.form.get('delete_id')
