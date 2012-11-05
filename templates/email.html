@@ -12,7 +12,14 @@
     <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet">
 
     <!--script src="/static/bootstrap/js/jquery-1.7.2.js"></script -->
+<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/css/jquery.dataTables.css">
+ 
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+
+<!-- DataTables -->
+<script type="text/javascript" charset="utf8" src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
 
     <script src="/static/bootstrap/js/bootstrap.js"></script>
 
@@ -37,6 +44,38 @@
   </head>
 
   <body>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    $('#myEmails').dataTable( {
+        "bProcessing": true,
+        "bServerSide": true,
+        "sAjaxSource": "{{request.path}}json",
+        "bPaginate": true,
+        "bFilter": false,
+        "sPaginationType": "full_numbers",
+        "bLengthChange": false,
+        "iDisplayLength": 30
+    } );
+
+
+ /* attach a submit handler to the form */
+  $("#refresh").click(function(event) {
+
+    /* stop form from submitting normally */
+    event.preventDefault(); 
+      
+    // TODO: what if this fails?
+    // set a "refreshing..." page
+    $.post('/mail/sync', function(data) {
+        // upon success, call this
+        location.reload();
+    })
+
+  });
+
+} );
+</script>
 
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
@@ -63,6 +102,9 @@
   </li>
 </ul>
 
+
+
+
 <ul class="nav pull-right">
               <li><a href="/logout">Logout</a></li>
 
@@ -73,40 +115,36 @@
       </div>
     </div>
 
+
 <div class="container-fluid">
+
   <div class="row-fluid">
     <div class="span2">
   
- <div class="accordion" id="accordion2" data-collapse-type="manual">
-
 {% if not mailboxes %}
-No mailboxes set up. Oh no!
+<p>No mailboxes set up. Oh no!</p>
 {% else %}
 
+<center>
+<a class="btn" href="#" id="refresh"><i class="icon-refresh"></i> Refresh</a>
+</center>
 
-
-{% for mailbox in mailboxes %}
-            <div class="accordion-group">
-              <div class="accordion-heading">
-                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#mailboxCollapse{{ mailbox.id  }}">
-                  {{ mailbox.email }}
-                </a>
-              </div>
-              <div id="mailboxCollapse{{ mailbox.id }}" class="accordion-body collapse">
-                <div class="accordion-inner">
+<hr />
 
 <ul class="nav nav-list">
+{% for mailbox in mailboxes %}
+  <li class="nav-header">{{mailbox.email}}</li>
 
 {% for key, value in r[mailbox.email] recursive %}
 
-
+{% if current_email == mailbox.email and current_folder == value.get_lineage() %}
+  <li class="active">
+{% else %}
   <li> <!-- class="#active" -->
+{% endif %}
+
 <a href="/mail/{{ mailbox.email }}/{{ value.get_lineage() }}">
   {{ key }}
-<!--
-  {{ value }}
-  {{ value.get_lineage() }}
--->
 </a>
   {% if value.children %}
     <ul class="nav nav-list">{{ loop(value) }} </ul>
@@ -115,18 +153,10 @@ No mailboxes set up. Oh no!
 
 {% endfor %}
 
-</ul>
-
-                </div>
-              </div>
-            </div>
-
 {% endfor %}
+
+</ul>
 {% endif %}
-
-          </div>
-
-
 
     </div>
     <div class="span10">
@@ -144,15 +174,23 @@ No mailboxes set up. Oh no!
 </ul>
 
 {% if emails %}
-<table class="table">
-<tr>
-<td>gargoylemusic@gmail.com</td>
-<td>hi there!</td>
-<td>This is an email body la la la...</td>
-<td>7/18/12 9:35pm</td>
-</tr>
+
+<table class="table" id="myEmails">
+    <thead>
+        <tr>
+            <th>From</th> <!-- TODO: "To" -->
+            <th>Subject</th>
+<!--
+            <th>Body</th>
+-->
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
 </table>
 
+<!--
 <div class="pagination">
   <ul>
     <li><a href="#">Prev</a></li>
@@ -166,6 +204,8 @@ No mailboxes set up. Oh no!
     <li><a href="#">Next</a></li>
   </ul>
 </div>
+-->
+
 {% endif %}
 
     </div>

@@ -10,11 +10,18 @@ import sys
 import imaplib
 from collections import OrderedDict
 import os
+from subprocess import call
 import urllib
 from os import listdir
+from read_maildir import MaildirUtils
+
+import config
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+
+# TODO: do all of this in config
+app.config['SQLALCHEMY_DATABASE_URI'] = config.HIPFLASK_SQLITE_CONN
+
 db = SQLAlchemy(app)
 
 SECRET_KEY = "yeah, not actually a secret"
@@ -155,6 +162,8 @@ def logout():
 @app.route('/admin/mail/delete', methods=['POST'])
 @login_required
 def admin_delete():
+    # TODO: instead, mark as deleted so that we preserve data and can
+    #       retrieve maildir in future
     try:
         a = ImapAccount.query.filter_by(
             id=request.form.get('delete_id')
@@ -172,22 +181,37 @@ def admin_delete():
     return redirect(url_for("admin_mail"))
 
 
+@app.route('/mail/sync', methods=['POST'])
+@login_required
+def sync_mail():
+    call(['offlineimap', '-c', config.HIPFLASK_FOLDERS['offlineimap'] + '/' + config.HIPFLASK_OFFLINEIMAPRC])
+    call(['mu', 'index', '--maildir=%s' % config.HIPFLASK_FOLDERS['maildirs'], '--muhome=%s' % config.HIPFLASK_FOLDERS['mu']])
+    return 'OK'
+
+
 def rewrite_offlineimaprc():
     all_mailboxes = ImapAccount.query.all()
-    f = open('/home/jay/oi/offlineimaprc', 'w')
+    f = open(config.HIPFLASK_FOLDERS['offlineimap'] + '/' + config.HIPFLASK_OFFLINEIMAPRC, 'w')
 
     if all_mailboxes:
-        f.write(render_template('offlineimaprc.txt', mailboxes=all_mailboxes,
+        f.write(render_template('offlineimaprc.txt', maildir_path=config.HIPFLASK_FOLDERS['maildirs'], mailboxes=all_mailboxes,
                 email_addresses=[box.email for box in all_mailboxes]))
     else:
         f.write('')
 
     f.close()
 
+    for mailbox in all_mailboxes:
+        mailbox_path = config.HIPFLASK_FOLDERS['maildirs'] + '/'+ mailbox.email
+        if not os.path.exists(mailbox_path):
+            os.makedirs(mailbox_path)
+
 
 @app.route('/admin/mail', methods=['GET', 'POST'])
 @login_required
 def admin_mail():
+    # TODO: add checkboxes for: ssl, gmail
+    # TODO: change folder mappings for gmail (ie [Gmail] namespace)
     def verify_imap_credential(server, email, passwd):
         try:
             m = imaplib.IMAP4_SSL(request.form.get('server', ''))
@@ -221,23 +245,44 @@ def mail_json(email, folder):
     email = urllib.unquote(email)
     folder = urllib.unquote(folder)
     mailboxes = ImapAccount.query.filter_by(user_id=current_user.id, email=email).first()
+
+    # TODO: return 'empty' messages rather than {}
+
     if not mailboxes:
         return '{}'  # actually return 404
 
-    message = {
-        'from': 'foo@bar.com',
-        'subject': 'my subject',
-        'body': 'body preview...',
-        'date': '11/7/2012',
-    }
+    messagepath = config.HIPFLASK_FOLDERS['maildirs'] + '/' + email + '/' + folder
+    if not os.path.isdir(messagepath):
+        return '{}'  # actually return 404
+
+    num_requested = int(request.args['iDisplayLength'])
+
+    # TODO: sanity check on this value! what if it is greater than total?
+    starting_record = int(request.args['iDisplayStart'])
+
+    md = MaildirUtils(email)
+    total_records, msgs = md.get_messages(email, folder, starting_record, num_requested)
+
+    filtered_records = total_records # 30 
+
+    import cgi
     messages = []
-    messages.append(message)
-    messages.append(message)
-    messages.append(message)
-    messages.append(message)
-    messages.append(message)
-    messages.append(message)
-    return jsonify(dict(messages=messages))
+    for m in msgs:
+        msg = [
+            m.get('from', ''),
+            m.get('subject', ''),
+            # m.get('summary', ''),
+            m.get('date', ''),
+            'read_unread_flag'
+        ]
+        messages.append([cgi.escape(m) for m in msg])
+
+    return jsonify(dict(
+        aaData=messages,
+        iTotalRecords=total_records,
+        iTotalDisplayRecords=filtered_records,
+        sEcho=int(request.args['sEcho']),
+    ))
     
 
 @app.route("/mail/", defaults={'email': None, 'folder': None})
@@ -255,28 +300,28 @@ def mail(email, folder):
 
     for mailbox in page_info['mailboxes']:
         t = TreeNode()
-        for d in listdir("/home/jay/oi/" + mailbox.email):
+        for d in listdir(config.HIPFLASK_FOLDERS['maildirs'] + '/' + mailbox.email):
             t.add_child(d)
 
         mail_directories[mailbox.email] = t
 
     page_info['r'] = mail_directories
 
-    page_info['emails'] = None
+    page_info['emails'] = False
 
     breadcrumbs = []
-    if (email and folder) and (email in [x.email for x in page_info['mailboxes']]) and (os.path.isdir('/home/jay/oi/' + email + '/' + folder)):
-        page_info['emails'] = 'here you are!'
+    if (email and folder) and (email in [x.email for x in page_info['mailboxes']]) and (os.path.isdir(config.HIPFLASK_FOLDERS['maildirs'] + '/' + email + '/' + folder)):
+        page_info['emails'] = True
         breadcrumbs.append(email)
         breadcrumbs.extend(folder.split('.'))
 
-    return render_template('email.html', breadcrumbs=breadcrumbs, **page_info)
+    return render_template('email.html', breadcrumbs=breadcrumbs, current_email=email, current_folder=folder, **page_info)
 
 
 if __name__ == "__main__":
     db.create_all()
-    if not User.query.filter_by(email='a').first():
-        u = User('a', 'a')
+    if not User.query.filter_by(email='admin').first():
+        u = User('admin', 'peach')
         db.session.add(u)
         db.session.commit()
 
