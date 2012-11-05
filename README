@@ -1,0 +1,7 @@
+Requirements:
+
+pip install:
+    Flask, Flask-Bcrypt, Flask-Login, Flask-SQLAlchemy
+
+(Ubuntu) apt-get install:
+    maildir-utils, offlineimap
