@@ -204,6 +204,8 @@ def rewrite_offlineimaprc():
 @app.route('/admin/mail', methods=['GET', 'POST'])
 @login_required
 def admin_mail():
+    # TODO: add checkboxes for: ssl, gmail
+    # TODO: change folder mappings for gmail (ie [Gmail] namespace)
     def verify_imap_credential(server, email, passwd):
         try:
             m = imaplib.IMAP4_SSL(request.form.get('server', ''))
@@ -311,6 +313,7 @@ def mail(email, folder):
 
 
 if __name__ == "__main__":
+    print os.path.abspath('./hello')
     db.create_all()
     if not User.query.filter_by(email='a').first():
         u = User('a', 'a')
