@@ -14,8 +14,13 @@ import urllib
 from os import listdir
 from read_maildir import MaildirUtils
 
+import config
+
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+
+# TODO: do all of this in config
+app.config['SQLALCHEMY_DATABASE_URI'] = config.HIPFLASK_SQLITE_CONN
+
 db = SQLAlchemy(app)
 
 SECRET_KEY = "yeah, not actually a secret"
@@ -315,8 +320,8 @@ def mail(email, folder):
 if __name__ == "__main__":
     print os.path.abspath('./hello')
     db.create_all()
-    if not User.query.filter_by(email='a').first():
-        u = User('a', 'a')
+    if not User.query.filter_by(email='admin').first():
+        u = User('admin', 'peach')
         db.session.add(u)
         db.session.commit()
 

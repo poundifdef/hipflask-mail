@@ -6,5 +6,7 @@
 3. maildirs/ contains the actual Maildir directories for each mailbox synced
    by hipflask-mail
 
+4. sqlite/ has the SQLite db containing user and account information
+
 Because git cannot store empty folders, these directories are created if they
 do not already exist based on config.py
