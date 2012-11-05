@@ -173,10 +173,13 @@ def admin_delete():
     return redirect(url_for("admin_mail"))
 
 
+@app.route('/mail/sync', methods=['POST'])
+@login_required
 def sync_mail():
-    pass
-    # offlineimap -c /home/jay/oi/offlineimaprc
-    # mu index --maildir=/home/jay/oi
+    from subprocess import call
+    call(['offlineimap', '-c', '/home/jay/oi/offlineimaprc'])
+    call(['mu', 'index', '--maildir=/home/jay/oi'])
+    return 'OK'
 
 
 def rewrite_offlineimaprc():
