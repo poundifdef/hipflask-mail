@@ -5,3 +5,5 @@ pip install:
 
 (Ubuntu) apt-get install:
     maildir-utils, offlineimap
+
+Default username/passwd: admin/peach
