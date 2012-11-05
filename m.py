@@ -10,6 +10,7 @@ import sys
 import imaplib
 from collections import OrderedDict
 import os
+from subprocess import call
 import urllib
 from os import listdir
 from read_maildir import MaildirUtils
@@ -183,18 +184,17 @@ def admin_delete():
 @app.route('/mail/sync', methods=['POST'])
 @login_required
 def sync_mail():
-    from subprocess import call
-    call(['offlineimap', '-c', '/home/jay/oi/offlineimaprc'])
-    call(['mu', 'index', '--maildir=/home/jay/oi'])
+    call(['offlineimap', '-c', config.HIPFLASK_FOLDERS['offlineimap'] + '/' + config.HIPFLASK_OFFLINEIMAPRC])
+    call(['mu', 'index', '--maildir=%s' % config.HIPFLASK_FOLDERS['maildirs'], '--muhome=%s' % config.HIPFLASK_FOLDERS['mu']])
     return 'OK'
 
 
 def rewrite_offlineimaprc():
     all_mailboxes = ImapAccount.query.all()
-    f = open('/home/jay/oi/offlineimaprc', 'w')
+    f = open(config.HIPFLASK_FOLDERS['offlineimap'] + '/' + config.HIPFLASK_OFFLINEIMAPRC, 'w')
 
     if all_mailboxes:
-        f.write(render_template('offlineimaprc.txt', mailboxes=all_mailboxes,
+        f.write(render_template('offlineimaprc.txt', maildir_path=config.HIPFLASK_FOLDERS['maildirs'], mailboxes=all_mailboxes,
                 email_addresses=[box.email for box in all_mailboxes]))
     else:
         f.write('')
@@ -202,8 +202,9 @@ def rewrite_offlineimaprc():
     f.close()
 
     for mailbox in all_mailboxes:
-        if not os.path.exists('/home/jay/oi/' + mailbox.email):
-            os.makedirs('/home/jay/oi/' + mailbox.email)
+        mailbox_path = config.HIPFLASK_FOLDERS['maildirs'] + '/'+ mailbox.email
+        if not os.path.exists(mailbox_path):
+            os.makedirs(mailbox_path)
 
 
 @app.route('/admin/mail', methods=['GET', 'POST'])
@@ -250,7 +251,7 @@ def mail_json(email, folder):
     if not mailboxes:
         return '{}'  # actually return 404
 
-    messagepath = '/home/jay/oi/' + email + '/' + folder
+    messagepath = config.HIPFLASK_FOLDERS['maildirs'] + '/' + email + '/' + folder
     if not os.path.isdir(messagepath):
         return '{}'  # actually return 404
 
@@ -299,7 +300,7 @@ def mail(email, folder):
 
     for mailbox in page_info['mailboxes']:
         t = TreeNode()
-        for d in listdir("/home/jay/oi/" + mailbox.email):
+        for d in listdir(config.HIPFLASK_FOLDERS['maildirs'] + '/' + mailbox.email):
             t.add_child(d)
 
         mail_directories[mailbox.email] = t
@@ -309,7 +310,7 @@ def mail(email, folder):
     page_info['emails'] = False
 
     breadcrumbs = []
-    if (email and folder) and (email in [x.email for x in page_info['mailboxes']]) and (os.path.isdir('/home/jay/oi/' + email + '/' + folder)):
+    if (email and folder) and (email in [x.email for x in page_info['mailboxes']]) and (os.path.isdir(config.HIPFLASK_FOLDERS['maildirs'] + '/' + email + '/' + folder)):
         page_info['emails'] = True
         breadcrumbs.append(email)
         breadcrumbs.extend(folder.split('.'))
@@ -318,7 +319,6 @@ def mail(email, folder):
 
 
 if __name__ == "__main__":
-    print os.path.abspath('./hello')
     db.create_all()
     if not User.query.filter_by(email='admin').first():
         u = User('admin', 'peach')

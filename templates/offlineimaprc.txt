@@ -11,7 +11,7 @@ remoterepository = {{ box.email }}Remote
 [Repository {{ box.email -}}Local]
 
 type = Maildir
-localfolders = ~/oi/{{ box.email }}
+localfolders = {{maildir_path}}/{{ box.email }}
 
 [Repository {{ box.email -}}Remote]
 

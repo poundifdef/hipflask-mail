@@ -1,6 +1,8 @@
 from subprocess import call, Popen, PIPE
 from pprint import pprint
 
+import config
+
 class MaildirUtils:
     def __init__(self, account):
         self.account = account
@@ -10,7 +12,8 @@ class MaildirUtils:
             'mu',
             'view',
             msg_path,
-            '--summary-len=5'
+            '--summary-len=5',
+            '--muhome=%s' % config.HIPFLASK_FOLDERS['mu']
         ]
 
         p = Popen(cmd, stdout=PIPE).stdout
@@ -37,6 +40,7 @@ class MaildirUtils:
         p = Popen([
             'mu',
             'find',
+            '--muhome=%s' % config.HIPFLASK_FOLDERS['mu'],
             'maildir:/%s/%s' % (email, folder),
             '--sortfield=date',
             '--reverse',
