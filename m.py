@@ -194,6 +194,10 @@ def rewrite_offlineimaprc():
 
     f.close()
 
+    for mailbox in all_mailboxes:
+        if not os.path.exists('/home/jay/oi/' + mailbox.email):
+            os.makedirs('/home/jay/oi/' + mailbox.email)
+
 
 @app.route('/admin/mail', methods=['GET', 'POST'])
 @login_required
