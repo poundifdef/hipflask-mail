@@ -3,10 +3,26 @@ from pprint import pprint
 
 import base64
 import config
+import urllib
 
 class MaildirUtils:
     def __init__(self, account):
         self.account = account
+
+    def get_message(self, msg_path):
+        cmd = [
+            'mu',
+            'view',
+            msg_path,
+            '--muhome=%s' % config.HIPFLASK_FOLDERS['mu']
+        ]
+
+        p = Popen(cmd, stdout=PIPE).stdout
+        message = p.read()
+        p.close()
+
+        # TODO: make this a dict of fields
+        return message
 
     def _get_fields(self, msg_path, length=50):
         cmd = [
@@ -21,7 +37,7 @@ class MaildirUtils:
         fields = p.read().splitlines()
         p.close()
 
-        message = {'path': base64.b64encode(msg_path)}
+        message = {}
         for field in fields:
             separator = field.find(':')
             
@@ -68,7 +84,7 @@ class MaildirUtils:
             #print msg_path
             message = self._get_fields(msg_path)
             message['seen'] = 'S' in flags
-            message['path'] = msg_path
+            message['path'] = urllib.quote(base64.b64encode(msg_path))
                 
             messages.append(message)
 

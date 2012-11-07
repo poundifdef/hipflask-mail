@@ -14,6 +14,7 @@ from subprocess import call
 import urllib
 from os import listdir
 from read_maildir import MaildirUtils
+import base64
 
 import config
 
@@ -349,6 +350,11 @@ def mail_message(email, folder):
     messagepath = config.HIPFLASK_FOLDERS['maildirs'] + '/' + email + '/' + folder
     if not os.path.isdir(messagepath):
         return ''  # actually return 404
+
+    msg_path = base64.b64decode(request.args.get('message'))
+
+    md = MaildirUtils(email)
+    return '<pre>' + md.get_message(msg_path) + '</pre>'
 
 
 if __name__ == "__main__":

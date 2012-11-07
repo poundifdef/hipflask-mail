@@ -218,7 +218,11 @@ $(document).ready(function() {
         <tr style="font-weight: bold;">
         {% endif %}
             <td>{{email.from}}</td>
-            <td>{{email.subject}}</td>
+            <td>
+                <a href="/mail/message/{{current_email}}/{{current_folder}}?message={{email.path}}">
+                {{email.subject}}
+                </a>
+            </td>
             <td>{{email.date}}</td>
         </tr>
     {% endfor %}
