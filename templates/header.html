@@ -86,6 +86,7 @@ $(document).ready(function() {
 
     /* stop form from submitting normally */
     event.preventDefault(); 
+    $('#refreshModal').modal('show');
       
     // TODO: what if this fails?
     // set a "refreshing..." page
@@ -98,6 +99,17 @@ $(document).ready(function() {
 
 } );
 </script>
+
+<div class="modal hide fade" data-backdrop="static" data-keyboard="false" id="refreshModal">
+  <div class="modal-header">
+    <h3>Refreshing...</h3>
+  </div>
+  <div class="modal-body">
+    <p>Refreshing emails...</p>
+  </div>
+</div>
+
+
 
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">

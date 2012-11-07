@@ -28,7 +28,7 @@
 
 <tr>
 <td>{{ mailbox.email  }}</td>
-<td>{{ mailbox.passwd  }}</td>
+<td>*****</td>
 <td>{{ mailbox.server }}</td>
 <td>
 
@@ -47,7 +47,7 @@
 <h3>new.</h3>
 <form method="post" action="/admin/mail" class="well form-inline">
 <input type="text" name="email" placeholder="email address">
-<input type="text" name="passwd" placeholder="password">
+<input type="password" name="passwd" placeholder="password">
 <input type="text" name="server" placeholder="imap server name">
 <button type="submit" class="btn btn-primary"><i class="icon-plus icon-white"></i></button>
 </form>
