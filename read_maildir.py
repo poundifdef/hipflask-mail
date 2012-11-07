@@ -1,11 +1,28 @@
 from subprocess import call, Popen, PIPE
 from pprint import pprint
 
+import base64
 import config
+import urllib
 
 class MaildirUtils:
     def __init__(self, account):
         self.account = account
+
+    def get_message(self, msg_path):
+        cmd = [
+            'mu',
+            'view',
+            msg_path,
+            '--muhome=%s' % config.HIPFLASK_FOLDERS['mu']
+        ]
+
+        p = Popen(cmd, stdout=PIPE).stdout
+        message = p.read()
+        p.close()
+
+        # TODO: make this a dict of fields
+        return message
 
     def _get_fields(self, msg_path, length=50):
         cmd = [
@@ -46,7 +63,8 @@ class MaildirUtils:
             '--reverse',
             '--format=plain',
             '--fields',
-            'l'
+            'g l'
+            #'g l'
         ], stdout=PIPE).stdout
         # TODO: search/filter?
         all_lines = p.read().splitlines()
@@ -56,7 +74,18 @@ class MaildirUtils:
 
         messages = []
         for l in lines:
-            message = self._get_fields(l)
+            msg_path = l
+            #print len(l.split(' '))
+            #flags, msg_path = set(l.split(' '))
+            s = l.split(' ')
+            flags = s[0]
+            msg_path = s[1]
+            #flags, msg_path = set(l.split(' '))
+            #print msg_path
+            message = self._get_fields(msg_path)
+            message['seen'] = 'S' in flags
+            message['path'] = urllib.quote(base64.b64encode(msg_path))
+                
             messages.append(message)
 
         return len(all_lines), messages

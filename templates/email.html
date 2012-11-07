@@ -1,162 +1,9 @@
 
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Hip Flask Mail. Go ahead, hit refresh.</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
+{% include 'header.html' %}
 
-    <!-- Le styles -->
-    <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet">
-
-    <!--script src="/static/bootstrap/js/jquery-1.7.2.js"></script -->
-<!-- DataTables CSS -->
-<link rel="stylesheet" type="text/css" href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/css/jquery.dataTables.css">
- 
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-
-<!-- DataTables -->
-<script type="text/javascript" charset="utf8" src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
-
-    <script src="/static/bootstrap/js/bootstrap.js"></script>
-
-    <style>
-      body {
-        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-      }
-    </style>
-    <!-- link href="/static/bootstrap/css/bootstrap-responsive.css" rel="stylesheet" -->
-
-    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-
-    <!-- Le fav and touch icons -->
-    <link rel="shortcut icon" href="../assets/ico/favicon.ico">
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">
-  </head>
-
-  <body>
-
-<script type="text/javascript">
-$(document).ready(function() {
-    $('#myEmails').dataTable( {
-        "bProcessing": true,
-        "bServerSide": true,
-        "sAjaxSource": "{{request.path}}json",
-        "bPaginate": true,
-        "bFilter": false,
-        "sPaginationType": "full_numbers",
-        "bLengthChange": false,
-        "iDisplayLength": 30
-    } );
-
-
- /* attach a submit handler to the form */
-  $("#refresh").click(function(event) {
-
-    /* stop form from submitting normally */
-    event.preventDefault(); 
-      
-    // TODO: what if this fails?
-    // set a "refreshing..." page
-    $.post('/mail/sync', function(data) {
-        // upon success, call this
-        location.reload();
-    })
-
-  });
-
-} );
-</script>
-
-    <div class="navbar navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <a class="brand" href="#">Hip Flask Mail</a>
-          <div class="nav-collapse">
-            <ul class="nav">
-              <li class="active"><a href="#">View Mail</a></li>
-
-   <li class="dropdown">
-    <a class="dropdown-toggle" data-toggle="dropdown" href="#menu1">
-      Admin
-      <b class="caret"></b>
-    </a>
-    <ul class="dropdown-menu">
-      <li><a href="/admin/mail">Edit Email Accounts</a></li>
-      <li><a href="#">Change Password</a></li>
-    </ul>
-  </li>
-</ul>
-
-
-
-
-<ul class="nav pull-right">
-              <li><a href="/logout">Logout</a></li>
-
-
-            </ul>
-          </div><!--/.nav-collapse -->
-        </div>
-      </div>
-    </div>
-
-
-<div class="container-fluid">
-
-  <div class="row-fluid">
     <div class="span2">
   
-{% if not mailboxes %}
-<p>No mailboxes set up. Oh no!</p>
-{% else %}
-
-<center>
-<a class="btn" href="#" id="refresh"><i class="icon-refresh"></i> Refresh</a>
-</center>
-
-<hr />
-
-<ul class="nav nav-list">
-{% for mailbox in mailboxes %}
-  <li class="nav-header">{{mailbox.email}}</li>
-
-{% for key, value in r[mailbox.email] recursive %}
-
-{% if current_email == mailbox.email and current_folder == value.get_lineage() %}
-  <li class="active">
-{% else %}
-  <li> <!-- class="#active" -->
-{% endif %}
-
-<a href="/mail/{{ mailbox.email }}/{{ value.get_lineage() }}">
-  {{ key }}
-</a>
-  {% if value.children %}
-    <ul class="nav nav-list">{{ loop(value) }} </ul>
-  {% endif %}
-  </li>
-
-{% endfor %}
-
-{% endfor %}
-
-</ul>
-{% endif %}
+{% include 'mail_folders.html' %}
 
     </div>
     <div class="span10">
@@ -184,9 +31,27 @@ $(document).ready(function() {
             <th>Body</th>
 -->
             <th>Date</th>
+<!--
+            <th>Path</th>
+-->
         </tr>
     </thead>
     <tbody>
+    {% for email in emails %}
+        {% if email.seen %}
+        <tr>
+        {% else %}
+        <tr style="font-weight: bold;">
+        {% endif %}
+            <td>{{email.from}}</td>
+            <td>
+                <a href="/mail/message/{{current_email}}/{{current_folder}}?message={{email.path}}">
+                {{email.subject}}
+                </a>
+            </td>
+            <td>{{email.date}}</td>
+        </tr>
+    {% endfor %}
     </tbody>
 </table>
 
@@ -209,27 +74,4 @@ $(document).ready(function() {
 {% endif %}
 
     </div>
-  </div>
-</div>
-
-    <!-- Le javascript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-<!--
-    <script src="bootstrap/js/bootstrap-transition.js"></script>
-    <script src="bootstrap/js/bootstrap-alert.js"></script>
-    <script src="bootstrap/js/bootstrap-modal.js"></script>
-    <script src="bootstrap/js/bootstrap-dropdown.js"></script>
-    <script src="bootstrap/js/bootstrap-scrollspy.js"></script>
-    <script src="bootstrap/js/bootstrap-tab.js"></script>
-    <script src="bootstrap/js/bootstrap-tooltip.js"></script>
-    <script src="bootstrap/js/bootstrap-popover.js"></script>
-    <script src="bootstrap/js/bootstrap-button.js"></script>
-    <script src="bootstrap/js/bootstrap-collapse.js"></script>
-    <script src="bootstrap/js/bootstrap-carousel.js"></script>
-    <script src="bootstrap/js/bootstrap-typeahead.js"></script>
--->
-
-  </body>
-</html>
-
+{% include 'footer.html' %}
