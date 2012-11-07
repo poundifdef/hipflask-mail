@@ -1,0 +1,28 @@
+
+{% include 'header.html' %}
+
+    <div class="span2">
+  
+{% include 'mail_folders.html' %}
+
+    </div>
+    <div class="span10">
+
+<ul class="breadcrumb">
+    {% if breadcrumbs %}
+    {% for crumb in breadcrumbs %}
+      <li>
+       {{crumb}} <span class="divider">/</span>
+      </li>
+    {% endfor %}
+    {% else %}
+    <li>Please select an email folder on the left</li>
+    {% endif %}
+</ul>
+
+<pre>
+{{ message }}
+</pre>
+
+    </div>
+{% include 'footer.html' %}
