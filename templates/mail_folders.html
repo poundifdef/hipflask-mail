@@ -1,0 +1,37 @@
+
+{% if not mailboxes %}
+<p>No mailboxes set up. Oh no!</p>
+{% else %}
+
+<center>
+<a class="btn" href="#" id="refresh"><i class="icon-refresh"></i> Refresh</a>
+</center>
+
+<hr />
+
+<ul class="nav nav-list">
+{% for mailbox in mailboxes %}
+  <li class="nav-header">{{mailbox.email}}</li>
+
+{% for key, value in r[mailbox.email] recursive %}
+
+{% if current_email == mailbox.email and current_folder == value.get_lineage() %}
+  <li class="active">
+{% else %}
+  <li> <!-- class="#active" -->
+{% endif %}
+
+<a href="/mail/{{ mailbox.email }}/{{ value.get_lineage() }}">
+  {{ key }}
+</a>
+  {% if value.children %}
+    <ul class="nav nav-list">{{ loop(value) }} </ul>
+  {% endif %}
+  </li>
+
+{% endfor %}
+
+{% endfor %}
+
+</ul>
+{% endif %}

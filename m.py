@@ -14,6 +14,8 @@ from subprocess import call
 import urllib
 from os import listdir
 from read_maildir import MaildirUtils
+import base64
+import cgi
 
 import config
 
@@ -265,7 +267,6 @@ def mail_json(email, folder):
 
     filtered_records = total_records # 30 
 
-    import cgi
     messages = []
     for m in msgs:
         msg = [
@@ -273,7 +274,7 @@ def mail_json(email, folder):
             m.get('subject', ''),
             # m.get('summary', ''),
             m.get('date', ''),
-            'read_unread_flag'
+            m.get('path', ''),
         ]
         messages.append([cgi.escape(m) for m in msg])
 
@@ -307,15 +308,72 @@ def mail(email, folder):
 
     page_info['r'] = mail_directories
 
-    page_info['emails'] = False
+    page_info['emails'] = []
 
     breadcrumbs = []
     if (email and folder) and (email in [x.email for x in page_info['mailboxes']]) and (os.path.isdir(config.HIPFLASK_FOLDERS['maildirs'] + '/' + email + '/' + folder)):
-        page_info['emails'] = True
+        num_requested = 30 #int(request.args['iDisplayLength'])
+
+        # TODO: sanity check on this value! what if it is greater than total?
+        starting_record = int(request.args.get('start', 0))
+
+        md = MaildirUtils(email)
+        total_records, page_info['emails'] = md.get_messages(email, folder, starting_record, num_requested)
+
+        #filtered_records = total_records # 30 
+
+        #page_info['emails'] = msgs
+        #page_info['emails'].append({'from': 'jay', 'subject': 'mysubj', 'date': 'today'})
+
+
+
         breadcrumbs.append(email)
         breadcrumbs.extend(folder.split('.'))
 
     return render_template('email.html', breadcrumbs=breadcrumbs, current_email=email, current_folder=folder, **page_info)
+
+
+@app.route("/mail/message/<email>/<folder>")
+@login_required
+def mail_message(email, folder):
+    email = urllib.unquote(email)
+    folder = urllib.unquote(folder)
+    mailboxes = ImapAccount.query.filter_by(user_id=current_user.id, email=email).first()
+
+    if not request.args.get('message'):
+        return 'Please select a message'
+
+    # TODO: return 'empty' messages rather than {}
+    if not mailboxes:
+        return 'Please select a message'  # actually return 404
+
+    messagepath = config.HIPFLASK_FOLDERS['maildirs'] + '/' + email + '/' + folder
+    if not os.path.isdir(messagepath):
+        return 'Please select a message'  # actually return 404
+
+    msg_path = base64.b64decode(request.args.get('message'))
+
+    breadcrumbs = []
+    breadcrumbs.append(email)
+    breadcrumbs.extend(folder.split('.'))
+    mailboxes = ImapAccount.query.filter_by(user_id=current_user.id).all()
+
+
+    mail_directories = {}
+
+    for mailbox in mailboxes:
+        t = TreeNode()
+        for d in listdir(config.HIPFLASK_FOLDERS['maildirs'] + '/' + mailbox.email):
+            t.add_child(d)
+
+        mail_directories[mailbox.email] = t
+
+    r = mail_directories
+
+
+    md = MaildirUtils(email)
+    msg = md.get_message(msg_path).decode('utf-8')
+    return render_template('message.html', message=msg, breadcrumbs=breadcrumbs, current_email=email, current_folder=folder, mailboxes=mailboxes, r=r)
 
 
 if __name__ == "__main__":
