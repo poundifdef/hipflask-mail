@@ -47,7 +47,8 @@ class MaildirUtils:
             '--reverse',
             '--format=plain',
             '--fields',
-            'l'
+            'g l'
+            #'g l'
         ], stdout=PIPE).stdout
         # TODO: search/filter?
         all_lines = p.read().splitlines()
@@ -57,7 +58,18 @@ class MaildirUtils:
 
         messages = []
         for l in lines:
-            message = self._get_fields(l)
+            msg_path = l
+            #print len(l.split(' '))
+            #flags, msg_path = set(l.split(' '))
+            s = l.split(' ')
+            flags = s[0]
+            msg_path = s[1]
+            #flags, msg_path = set(l.split(' '))
+            #print msg_path
+            message = self._get_fields(msg_path)
+            message['seen'] = 'S' in flags
+            message['path'] = msg_path
+                
             messages.append(message)
 
         return len(all_lines), messages

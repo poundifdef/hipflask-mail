@@ -317,11 +317,11 @@ def mail(email, folder):
         starting_record = int(request.args.get('start', 0))
 
         md = MaildirUtils(email)
-        total_records, msgs = md.get_messages(email, folder, starting_record, num_requested)
+        total_records, page_info['emails'] = md.get_messages(email, folder, starting_record, num_requested)
 
         #filtered_records = total_records # 30 
 
-        page_info['emails'] = msgs
+        #page_info['emails'] = msgs
         #page_info['emails'].append({'from': 'jay', 'subject': 'mysubj', 'date': 'today'})
 
 

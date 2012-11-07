@@ -212,7 +212,11 @@ $(document).ready(function() {
     </thead>
     <tbody>
     {% for email in emails %}
+        {% if email.seen %}
         <tr>
+        {% else %}
+        <tr style="font-weight: bold;">
+        {% endif %}
             <td>{{email.from}}</td>
             <td>{{email.subject}}</td>
             <td>{{email.date}}</td>
