@@ -46,7 +46,11 @@
             <td>{{email.from}}</td>
             <td>
                 <a href="/mail/message/{{current_email}}/{{current_folder}}?message={{email.path}}">
+                {% if email.subject %}
                 {{email.subject}}
+                {% else %}
+                <i>(no subject)</i>
+                {% endif %}
                 </a>
             </td>
             <td>{{email.date}}</td>
