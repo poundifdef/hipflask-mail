@@ -1,6 +1,7 @@
 from subprocess import call, Popen, PIPE
 from pprint import pprint
 
+import base64
 import config
 
 class MaildirUtils:
@@ -20,7 +21,7 @@ class MaildirUtils:
         fields = p.read().splitlines()
         p.close()
 
-        message = {}
+        message = {'path': base64.b64encode(msg_path)}
         for field in fields:
             separator = field.find(':')
             

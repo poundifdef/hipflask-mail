@@ -13,13 +13,17 @@
 
     <!--script src="/static/bootstrap/js/jquery-1.7.2.js"></script -->
 <!-- DataTables CSS -->
+<!--
 <link rel="stylesheet" type="text/css" href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/css/jquery.dataTables.css">
+-->
  
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 
 <!-- DataTables -->
+<!--
 <script type="text/javascript" charset="utf8" src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
+-->
 
     <script src="/static/bootstrap/js/bootstrap.js"></script>
 
@@ -46,6 +50,7 @@
   <body>
 
 <script type="text/javascript">
+/*
 $(document).ready(function() {
     $('#myEmails').dataTable( {
         "bProcessing": true,
@@ -55,9 +60,25 @@ $(document).ready(function() {
         "bFilter": false,
         "sPaginationType": "full_numbers",
         "bLengthChange": false,
-        "iDisplayLength": 30
+        "iDisplayLength": 30,
+
+        "aoColumns": [
+            null,
+            null,
+            null,
+            {"bSearchable": false,
+             "bVisible": false}
+        ]
+
     } );
 
+    $('#myEmails tbody tr').live('click', function() {
+        var nTds = $('td', this);
+        var msg_path = $(nTds[4]).text();
+        alert(nTds);
+        //alert(msg_path);
+    });
+*/
 
  /* attach a submit handler to the form */
   $("#refresh").click(function(event) {
@@ -184,9 +205,19 @@ $(document).ready(function() {
             <th>Body</th>
 -->
             <th>Date</th>
+<!--
+            <th>Path</th>
+-->
         </tr>
     </thead>
     <tbody>
+    {% for email in emails %}
+        <tr>
+            <td>{{email.from}}</td>
+            <td>{{email.subject}}</td>
+            <td>{{email.date}}</td>
+        </tr>
+    {% endfor %}
     </tbody>
 </table>
 
